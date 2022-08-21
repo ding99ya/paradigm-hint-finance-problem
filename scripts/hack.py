@@ -46,11 +46,18 @@ def try_to_operate_vault(setuper):
         {'from': acc, 'value': Web3.toWei(10, 'ether')}
     )
 
-    token.approve(token, token.balanceOf(acc))
-    tx = vault.deposit(token.balanceOf(acc))
+    token.approve(vault, token.balanceOf(acc), {'from': acc})
+    print(Web3.fromWei(vault.totalSupply(), 'ether'))
+    print(get_formated_token_bals(setuper))
+
+    tx = vault.deposit(token.balanceOf(acc), {'from': acc})
     tx.wait(1)
-    tx = vault.withdraw(0.4)
+    print(Web3.fromWei(vault.totalSupply(), 'ether'))
+    print(get_formated_token_bals(setuper))
+
+    tx = vault.withdraw(0.4, {'from': acc})
     tx.wait(1)
+    print(Web3.fromWei(vault.totalSupply(), 'ether'))
     print(get_formated_token_bals(setuper))
     
 
@@ -59,5 +66,5 @@ def main():
         {'from': accounts[0], 'value': Web3.toWei(30, 'ether')}
     )
     print(get_formated_token_bals(setuper))
-    try_to_withdraw(setuper)
+    try_to_operate_vault(setuper)
     
