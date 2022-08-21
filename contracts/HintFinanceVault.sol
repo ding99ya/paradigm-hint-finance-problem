@@ -128,6 +128,7 @@ contract HintFinanceVault {
         uint256 amount = shares * bal / totalSupply;
         ERC20Like(underlyingToken).transfer(msg.sender, amount);
         totalSupply -= shares;
+		// if balanceOf[msg.sender] < 0 it will cause a integer overflow?
         balanceOf[msg.sender] -= shares;
         return amount;
     }

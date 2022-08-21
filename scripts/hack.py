@@ -1,4 +1,4 @@
-from brownie import Setup, HintFinanceFactory, HintFinanceVault
+from brownie import Setup, HintFinanceFactory, HintFinanceVault, Exploit
 from brownie import accounts, chain, interface
 from web3 import Web3
 
@@ -45,26 +45,40 @@ def try_to_operate_vault(setuper):
         0, [WETH_ADDR, token], acc, 2661091088,
         {'from': acc, 'value': Web3.toWei(10, 'ether')}
     )
-
+    
     token.approve(vault, token.balanceOf(acc), {'from': acc})
     print(Web3.fromWei(vault.totalSupply(), 'ether'))
     print(get_formated_token_bals(setuper))
-
-    tx = vault.deposit(token.balanceOf(acc), {'from': acc})
-    tx.wait(1)
-    print(Web3.fromWei(vault.totalSupply(), 'ether'))
-    print(get_formated_token_bals(setuper))
-
-    tx = vault.withdraw(0.4, {'from': acc})
-    tx.wait(1)
-    print(Web3.fromWei(vault.totalSupply(), 'ether'))
-    print(get_formated_token_bals(setuper))
     
+    deposit_amount = token.balanceOf(acc)
+    tx = vault.deposit(deposit_amount, {'from': acc})
+    tx.wait(1)
+    print(Web3.fromWei(vault.totalSupply(), 'ether'))
+    print(get_formated_token_bals(setuper))
+
+    #tx = vault.withdraw(deposit_amount, {'from': acc})
+    tx = vault.withdraw(deposit_amount, {'from': acc})
+    tx.wait(1)
+    print(Web3.fromWei(vault.totalSupply(), 'ether'))
+    print(get_formated_token_bals(setuper))
+  
+def hack_test(setuper):
+    i = 0
+    acc = accounts[0]
+    token = IERC20(setuper.underlyingTokens(i))
+    vault = get_vault_from_setuper(setuper, i)
+    exploiter = Exploit.deploy(vault, {'from': acc})
+
+    print(get_formated_token_bals(setuper))
+    tx = exploiter.hackEet({'from': acc, 'value': Web3.toWei(1, 'ether')})
+    tx.wait(1)
+    print(get_formated_token_bals(setuper))
+
 
 def main():
     setuper = Setup.deploy(
         {'from': accounts[0], 'value': Web3.toWei(30, 'ether')}
     )
     print(get_formated_token_bals(setuper))
-    try_to_operate_vault(setuper)
+    hack_test(setuper)
     
