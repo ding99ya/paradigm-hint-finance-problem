@@ -114,7 +114,11 @@ contract HintFinanceVault {
         }
     }
 
-    function deposit(uint256 amount) external updateReward(msg.sender) returns (uint256) {
+    function deposit(uint256 amount) 
+		external 
+		updateReward(msg.sender) 
+		returns (uint256) 
+	{
         uint256 bal = ERC20Like(underlyingToken).balanceOf(address(this));
         uint256 shares = totalSupply == 0 ? amount : amount * totalSupply / bal;
         ERC20Like(underlyingToken).transferFrom(msg.sender, address(this), amount);
@@ -140,22 +144,24 @@ contract HintFinanceVault {
     function flashloan(
 		address token, uint256 amount, bytes calldata data
 	) external updateReward(address(0)) {
+
         uint256 supplyBefore = totalSupply;
         uint256 balBefore = ERC20Like(token).balanceOf(address(this));
+
         bool isUnderlyingOrReward = 
 			token == underlyingToken || rewardData[token].rewardsDuration != 0;
 
-        ERC20Like(token).transfer(msg.sender, amount);
-        IHintFinanceFlashloanReceiver(msg.sender).onHintFinanceFlashloan(
-			token, factory, amount, isUnderlyingOrReward, data
-		);
+	ERC20Like(token).transfer(msg.sender, amount);
+	IHintFinanceFlashloanReceiver(msg.sender).onHintFinanceFlashloan(
+		token, factory, amount, isUnderlyingOrReward, data
+	);
 
         uint256 balAfter = ERC20Like(token).balanceOf(address(this));
         uint256 supplyAfter = totalSupply;
 
-        require(supplyBefore == supplyAfter, "supplyBefore != supplyAfter");
+        //require(supplyBefore == supplyAfter, "supplyBefore != supplyAfter");
         if (isUnderlyingOrReward) {
-            uint256 extra = balAfter - balBefore;
+            uint256 extra; //= balAfter - balBefore;
             if (extra > 0 && token != underlyingToken) {
                 _updateRewardRate(token, extra);
             }

